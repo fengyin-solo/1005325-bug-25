@@ -43,7 +43,12 @@
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="String(row.id)">
-          <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+          <td v-for="column in columns" :key="column">
+            <RouterLink v-if="column === '影像编号'" class="link" :to="`/photo/${row.id}`">
+              {{ row[column] ?? '—' }}
+            </RouterLink>
+            <template v-else>{{ row[column] === '' || row[column] == null ? '—' : row[column] }}</template>
+          </td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
@@ -82,10 +87,10 @@ import {
 import type { EntryRow } from '@/data/types'
 
 const meta = moduleMeta('photo')
-const columns = ["影像编号", "拍摄对象", "拍摄方向", "拍摄日期", "拍摄人", "存储介质", "文件规格", "归档状态"]
+const columns = ["影像编号", "拍摄对象", "拍摄方向", "拍摄日期", "拍摄人", "存储介质", "文件规格", "归档日期", "重拍原因", "归档状态"]
 const actions = ["提交整理", "确认归档", "标记重拍"]
 const statuses = ["待整理", "已整理", "已归档", "待重拍"]
-const stats = [{"label": "待整理影像", "value": 0}, {"label": "已归档影像", "value": 0}, {"label": "待重拍影像", "value": 0}]
+const statLabels = ["待整理影像", "已归档影像", "待重拍影像"]
 
 const rows = ref<EntryRow[]>([])
 const total = ref(0)
@@ -97,6 +102,15 @@ const statusSummary = computed(() =>
     status,
     count: rows.value.filter((row) => String(row.status) === status).length,
   })),
+)
+const stats = computed(() =>
+  statLabels.map((label) => {
+    const status = label.replace('影像', '')
+    return {
+      label,
+      value: rows.value.filter((row) => String(row.status) === status).length,
+    }
+  }),
 )
 
 function resetFilters() {
@@ -114,7 +128,15 @@ function openCreate() {
 
 function runAction(action: string, row: EntryRow) {
   errorMessage.value = ''
-  const result = applyAction(meta.key, Number(row.id), action)
+  let reason = ''
+  if (action === '标记重拍') {
+    const input = window.prompt(`请填写影像 ${String(row['影像编号'] ?? '')} 的重拍原因：`)
+    if (input === null) {
+      return
+    }
+    reason = input
+  }
+  const result = applyAction(meta.key, Number(row.id), action, { reason })
   if (!result.ok) {
     errorMessage.value = result.message
     return

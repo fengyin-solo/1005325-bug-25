@@ -11,6 +11,7 @@ const Flotation = () => import('@/views/flotation/index.vue')
 const Dating = () => import('@/views/dating/index.vue')
 const Survey = () => import('@/views/survey/index.vue')
 const Photo = () => import('@/views/photo/index.vue')
+const PhotoDetail = () => import('@/views/photo/detail.vue')
 const Diary = () => import('@/views/diary/index.vue')
 const Labor = () => import('@/views/labor/index.vue')
 const Tool = () => import('@/views/tool/index.vue')
@@ -34,6 +35,7 @@ const router = createRouter({
     { path: '/dating', name: 'dating', component: Dating },
     { path: '/survey', name: 'survey', component: Survey },
     { path: '/photo', name: 'photo', component: Photo },
+    { path: '/photo/:id(\\d+)', name: 'photo-detail', component: PhotoDetail },
     { path: '/diary', name: 'diary', component: Diary },
     { path: '/labor', name: 'labor', component: Labor },
     { path: '/tool', name: 'tool', component: Tool },
